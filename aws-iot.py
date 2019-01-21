@@ -1,3 +1,5 @@
+import datetime
+import time
 from AWSIoTPythonSDK.MQTTLib import AWSIoTMQTTClient
 myMQTTClient = AWSIoTMQTTClient("Switch8266-v1")
 # myMQTTClient = AWSIoTMQTTClient("Switch8266-v1", useWebsocket=True)
@@ -10,4 +12,15 @@ myMQTTClient.configureConnectDisconnectTimeout(10)  # 10 sec
 myMQTTClient.configureMQTTOperationTimeout(5)  # 5 sec
 myMQTTClient.connect()
 
+def customCallback(result):
+  print("Result=%r"%(result,))
+
+myMQTTClient.publish("testTopic", "somePayload", 0)
+myMQTTClient.subscribe("testTopic", 1, customCallback)
+while 1:
+  print("%r Sleeping" % (datetime.datetime.now()))
+  time.sleep(10)
+
+myMQTTClient.unsubscribe("testTopic")
+myMQTTClient.disconnect()
 
