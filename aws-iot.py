@@ -1,26 +1,30 @@
 import datetime
 import time
-from AWSIoTPythonSDK.MQTTLib import AWSIoTMQTTClient
-myMQTTClient = AWSIoTMQTTClient("Switch8266-v1")
-# myMQTTClient = AWSIoTMQTTClient("Switch8266-v1", useWebsocket=True)
-myMQTTClient.configureEndpoint("a2arj82jdj67sr.iot.us-west-2.amazonaws.com", 8883)
-myMQTTClient.configureCredentials("./certs/aws/rootCA.pem", "./certs/aws/850d42b0ff-private.pem.key", "./certs/aws/850d42b0ff-certificate.pem.crt")
-# myMQTTClient.configureCredentials("./aws/rootCA.pem")
-myMQTTClient.configureOfflinePublishQueueing(-1)  # Infinite offline Publish queueing
-myMQTTClient.configureDrainingFrequency(2)  # Draining: 2 Hz
-myMQTTClient.configureConnectDisconnectTimeout(10)  # 10 sec
-myMQTTClient.configureMQTTOperationTimeout(5)  # 5 sec
-myMQTTClient.connect()
 
-def customCallback(result):
-  print("Result=%r"%(result,))
+from AWSIoTPythonSDK.MQTTLib import AWSIoTMQTTShadowClient
 
-myMQTTClient.publish("testTopic", "somePayload", 0)
-myMQTTClient.subscribe("testTopic", 1, customCallback)
+myShadowClient = AWSIoTMQTTShadowClient("Switch8266-v1")
+myShadowClient.configureEndpoint("a2arj82jdj67sr.iot.us-west-2.amazonaws.com", 8883)
+myShadowClient.configureCredentials("./certs/aws/rootCA.pem", "./certs/aws/850d42b0ff-private.pem.key", "./certs/aws/850d42b0ff-certificate.pem.crt")
+
+myShadowClient.configureConnectDisconnectTimeout(10)  # 10 sec
+myShadowClient.configureMQTTOperationTimeout(5)  # 5 sec
+
+
+myShadowClient.connect()
+
+def customCallback(result ,r2, r3):
+  print("Result=%r, %r, %r"%(result,r2, r3))
+
+deviceShadow = myShadowClient.createShadowHandlerWithName("Switch8266-v1", True)
+deviceShadow.shadowGet(customCallback, 5)
+
+deviceShadow.shadowRegisterDeltaCallback(customCallback)
+
 while 1:
   print("%r Sleeping" % (datetime.datetime.now()))
   time.sleep(10)
 
-myMQTTClient.unsubscribe("testTopic")
-myMQTTClient.disconnect()
+myDeviceShadow.shadowUnregisterDeltaCallback()
+myShadowClient.disconnect()
 
