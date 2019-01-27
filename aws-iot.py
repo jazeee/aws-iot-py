@@ -25,9 +25,10 @@ def customShadowCallback_Delta(payload, responseStatus, token):
         response = requests.post(URL, data = {})
         print(response)
 
-myShadowClient = AWSIoTMQTTShadowClient("Switch8266-v1", useWebsocket=True)
-myShadowClient.configureEndpoint("a2arj82jdj67sr.iot.us-west-2.amazonaws.com", 443)
-myShadowClient.configureCredentials("./certs/aws/rootCA.pem")#, "./certs/aws/850d42b0ff-private.pem.key", "./certs/aws/850d42b0ff-certificate.pem.crt")
+myShadowClient = AWSIoTMQTTShadowClient("Switch8266-east-v1", useWebsocket=True)
+# myShadowClient.configureEndpoint("a2arj82jdj67sr.iot.us-west-2.amazonaws.com", 443)
+myShadowClient.configureEndpoint("a2arj82jdj67sr-ats.iot.us-east-1.amazonaws.com", 443)
+myShadowClient.configureCredentials("./certs/aws-east/AmazonRootCA1.pem")#, "./certs/aws/850d42b0ff-private.pem.key", "./certs/aws/850d42b0ff-certificate.pem.crt")
 
 myShadowClient.configureConnectDisconnectTimeout(10)  # 10 sec
 myShadowClient.configureMQTTOperationTimeout(5)  # 5 sec
@@ -39,7 +40,7 @@ def customCallback(state ,r2, r3):
   print("Result=%r, %r, %r"%(state,r2, r3))
 
 
-deviceShadow = myShadowClient.createShadowHandlerWithName("Switch8266-v1", True)
+deviceShadow = myShadowClient.createShadowHandlerWithName("Switch8266-east-v1", True)
 # deviceShadow.shadowGet(customCallback, 5)
 
 deviceShadow.shadowRegisterDeltaCallback(customShadowCallback_Delta)
